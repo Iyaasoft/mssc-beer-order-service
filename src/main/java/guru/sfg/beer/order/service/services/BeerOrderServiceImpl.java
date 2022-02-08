@@ -79,15 +79,16 @@ public class BeerOrderServiceImpl implements BeerOrderService {
     @Override
     public BeerOrderDto placeOrder(UUID customerId, BeerOrderDto beerOrderDto) {
         Optional<Customer> customerOptional = customerRepository.findById(customerId);
-
+        log.debug("++++++++++++ Customer UUID "+ customerId);
         if (customerOptional.isPresent()) {
             BeerOrder beerOrder = beerOrderMapper.dtoToBeerOrder(beerOrderDto);
             beerOrder.setId(null); //should not be set by outside client
             beerOrder.setCustomer(customerOptional.get());
             beerOrder.setOrderStatus(OrderStatusEnum.NEW);
 
-            beerOrder.getBeerOrderLines().forEach(line -> line.setBeerOrder(beerOrder));
-
+            if (beerOrder.getBeerOrderLines() != null) {
+                beerOrder.getBeerOrderLines().forEach(line -> line.setBeerOrder(beerOrder));
+            }
             BeerOrder savedBeerOrder = beerOrderRepository.saveAndFlush(beerOrder);
 
             log.debug("Saved Beer Order: " + beerOrder.getId());
@@ -95,7 +96,10 @@ public class BeerOrderServiceImpl implements BeerOrderService {
             //todo impl
           //  publisher.publishEvent(new NewBeerOrderEvent(savedBeerOrder));
 
-            return beerOrderMapper.beerOrderToDto(savedBeerOrder);
+            BeerOrderDto dto = beerOrderMapper.beerOrderToDto(savedBeerOrder);
+            log.debug("Return Beer Order DTO : \n" +dto.toString());
+
+            return dto;
         }
         //todo add exception type
         throw new RuntimeException("Customer Not Found");

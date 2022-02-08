@@ -50,6 +50,7 @@ public class BeerOrder extends BaseEntity {
         this.beerOrderLines = beerOrderLines;
         this.orderStatus = orderStatus;
         this.orderStatusCallbackUrl = orderStatusCallbackUrl;
+
     }
 
     private String customerRef;
