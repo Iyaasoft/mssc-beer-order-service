@@ -1,7 +1,7 @@
 package guru.sfg.beer.order.service.services.client;
 
 import guru.sfg.beer.order.service.config.OrderConfig;
-import guru.sfg.beer.order.service.web.model.beer.service.dto.BeerDto;
+import guru.springframework.web.model.BeerDto;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;

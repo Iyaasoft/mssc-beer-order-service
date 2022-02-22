@@ -25,5 +25,10 @@
         <version>${wiremock.version}</version>
         <scope>test</scope>
     </dependency>
+        <dependency>
+            <groupId>guru.springframework.msscbrewrey</groupId>
+            <artifactId>mssc-beer-library</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
     </dependencies>
 </project>

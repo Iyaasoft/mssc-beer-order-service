@@ -1,11 +1,12 @@
 package guru.sfg.beer.order.service.base;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import guru.sfg.beer.order.service.web.model.BeerOrderDto;
-import guru.sfg.beer.order.service.web.model.BeerOrderLineDto;
-import guru.sfg.beer.order.service.web.model.BeerOrderPagedList;
-import guru.sfg.beer.order.service.web.model.OrderStatusEnum;
-import guru.sfg.beer.order.service.web.model.beer.service.dto.BeerDto;
+import guru.springframework.domain.BeerOrderStateEnum;
+import guru.springframework.web.model.BeerDto;
+import guru.springframework.web.model.BeerOrderDto;
+import guru.springframework.web.model.BeerOrderLineDto;
+import guru.springframework.web.model.BeerOrderPagedList;
+import guru.springframework.web.model.BeerStyleEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,7 +61,7 @@ public abstract class BaseInventoryTest {
         return new ResponseEntity<BeerDto>(BeerDto.builder()
                 .id(UUID.fromString(BEER_ID))
                 .beerName("Heinikin")
-                .beerStyle("LARGER")
+                .beerStyle(BeerStyleEnum.LARGER)
                 .createdDate(OffsetDateTime.now())
                 .lastModifiedDate(OffsetDateTime.now())
                 .price(new BigDecimal(3.50))
@@ -73,7 +74,7 @@ public abstract class BaseInventoryTest {
         BeerOrderDto dto = BeerOrderDto.builder()
                             .id(UUID.fromString(BEER_ID))
                             .beerOrderLines(orderLineDtos)
-                            .orderStatus(OrderStatusEnum.NEW)
+                            .orderStatus(BeerOrderStateEnum.NEW)
                             .customerId(UUID.fromString(CUSTOMER_ID))
                             .build();
         List<BeerOrderDto> dtos = new ArrayList<>();
@@ -87,7 +88,7 @@ public abstract class BaseInventoryTest {
        return  mapper.writeValueAsString(BeerOrderDto.builder()
                 .id(UUID.fromString(ORDER_ID))
                 .beerOrderLines(orderLineDtos)
-                .orderStatus(OrderStatusEnum.NEW)
+                .orderStatus(BeerOrderStateEnum.NEW)
                 .customerId(UUID.fromString(CUSTOMER_ID))
                 .build());
     }
