@@ -2,8 +2,8 @@ package guru.sfg.beer.order.service.web.mappers;
 
 import guru.sfg.beer.order.service.domain.BeerOrderLine;
 import guru.sfg.beer.order.service.services.client.BeerServiceClientImpl;
-import guru.sfg.beer.order.service.web.model.BeerOrderLineDto;
-import guru.sfg.beer.order.service.web.model.beer.service.dto.BeerDto;
+import guru.springframework.web.model.BeerDto;
+import guru.springframework.web.model.BeerOrderLineDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 
@@ -33,7 +33,7 @@ public abstract class BeerOrderLineDecorator implements  BeerOrderLineMapper {
         ResponseEntity<BeerDto> beerDto = beerServiceClient.beerServiceInvoker(lineDto.getBeerId());
         lineDto.setBeerId(line.getBeerId());
         lineDto.setBeerName(beerDto.getBody().getBeerName());
-        lineDto.setBeerName(beerDto.getBody().getBeerStyle());
+        lineDto.setBeerName(beerDto.getBody().getBeerStyle().toString());
         lineDto.setUpc(beerDto.getBody().getUpc());
         lineDto.setPrice(beerDto.getBody().getPrice());
         return lineDto;
