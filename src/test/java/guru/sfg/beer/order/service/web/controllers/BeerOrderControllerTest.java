@@ -8,6 +8,8 @@ import guru.sfg.beer.order.service.services.BeerOrderService;
 import guru.sfg.beer.order.service.services.client.BeerServiceClient;
 import guru.sfg.beer.order.service.web.mappers.BeerOrderLineMapper;
 import guru.sfg.beer.order.service.web.mappers.BeerOrderMapper;
+import guru.springframework.web.model.BeerOrderDto;
+import guru.springframework.web.model.BeerOrderPagedList;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,11 +59,15 @@ class BeerOrderControllerTest extends BaseInventoryTest {
         when(beerServiceClient.beerServiceInvoker(any(UUID.class))).thenReturn(getBeerDto());
         when(beerOrderService.listOrders(any(UUID.class), any(PageRequest.class))).thenReturn(getBearPageList());
 
+
+
     }
 
     @Test
     void listOrdersTest() throws Exception {
-        String expected = mapper.writeValueAsString(getBearPageList());
+        BeerOrderPagedList pageList = getBearPageList();
+        String expected = mapper.writeValueAsString(pageList);
+        when(beerOrderService.placeOrder(any(UUID.class), any(BeerOrderDto.class))).thenReturn(pageList.getContent().get(0));
         mvc.perform(get(BASE_URI + "/orders/", CUSTOMER_ID)
                         .contentType(MediaType.APPLICATION_JSON)
                         .param("pageNumber", "2")
@@ -75,13 +81,15 @@ class BeerOrderControllerTest extends BaseInventoryTest {
 
     @Test
     void placeOrderTest() throws Exception {
+        BeerOrderPagedList pageList = getBearPageList();
+        String expected = mapper.writeValueAsString(pageList);
+        when(beerOrderService.placeOrder(any(UUID.class), any(BeerOrderDto.class))).thenReturn(pageList.getContent().get(0));
 
         mvc.perform(post(BASE_URI + "/orders/", CUSTOMER_ID)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(getBeerOrderDtoJson()))
                 .andDo(print())
                 .andExpect(status().isCreated());
-
     }
 
     @Test

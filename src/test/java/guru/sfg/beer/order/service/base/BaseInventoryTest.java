@@ -1,6 +1,7 @@
 package guru.sfg.beer.order.service.base;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import guru.sfg.beer.order.service.domain.BeerOrderLine;
 import guru.springframework.domain.BeerOrderStateEnum;
 import guru.springframework.web.model.BeerDto;
 import guru.springframework.web.model.BeerOrderDto;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,12 +38,21 @@ public abstract class BaseInventoryTest {
                 .beerId(UUID.fromString(BEER_ID))
                 .beerName("Heinikin")
                 .beerStyle("LARGER")
-                .createdDate(OffsetDateTime.now())
-                .lastModifiedDate(OffsetDateTime.now())
+                .createdDate(null)
+                .lastModifiedDate(null)
                 .orderQuantity(6)
                 .price(new BigDecimal(3.50))
                 .upc("123456342").build();
 
+    }
+
+    protected BeerOrderLine getOrderDetail() {
+        return BeerOrderLine.builder()
+                .id(UUID.fromString(ORDER_ID))
+                .beerId(UUID.fromString(BEER_ID))
+                .createdDate(null)
+                .lastModifiedDate(null)
+                .orderQuantity(6).orderQuantity(6).quantityAllocated(0).build();
     }
 
     protected String getOrderLineJson() throws Exception {
@@ -49,8 +60,8 @@ public abstract class BaseInventoryTest {
                 .beerId(UUID.fromString(BEER_ID))
                 .beerName(BEER_NAME)
                 .beerStyle(BEER_STYLE)
-                .createdDate(OffsetDateTime.now())
-                .lastModifiedDate(OffsetDateTime.now())
+                .createdDate(null)
+                .lastModifiedDate(null)
                 .orderQuantity(6)
                 .price(new BigDecimal(3.50))
                 .upc(UPC).build());
@@ -62,8 +73,8 @@ public abstract class BaseInventoryTest {
                 .id(UUID.fromString(BEER_ID))
                 .beerName("Heinikin")
                 .beerStyle(BeerStyleEnum.LARGER)
-                .createdDate(OffsetDateTime.now())
-                .lastModifiedDate(OffsetDateTime.now())
+                .createdDate(null)
+                .lastModifiedDate(null)
                 .price(new BigDecimal(3.50))
                 .upc("123456342").build(), HttpStatus.OK);
     }
@@ -76,6 +87,8 @@ public abstract class BaseInventoryTest {
                             .beerOrderLines(orderLineDtos)
                             .orderStatus(BeerOrderStateEnum.NEW)
                             .customerId(UUID.fromString(CUSTOMER_ID))
+                .createdDate(null)
+                .lastModifiedDate(null)
                             .build();
         List<BeerOrderDto> dtos = new ArrayList<>();
         dtos.add(dto);
@@ -85,11 +98,14 @@ public abstract class BaseInventoryTest {
     protected String getBeerOrderDtoJson() throws Exception {
         List<BeerOrderLineDto> orderLineDtos = new ArrayList<>();
         orderLineDtos.add(getOrderLine());
-       return  mapper.writeValueAsString(BeerOrderDto.builder()
-                .id(UUID.fromString(ORDER_ID))
-                .beerOrderLines(orderLineDtos)
-                .orderStatus(BeerOrderStateEnum.NEW)
-                .customerId(UUID.fromString(CUSTOMER_ID))
-                .build());
+        BeerOrderDto dto = BeerOrderDto.builder()
+                    .id(UUID.fromString(ORDER_ID))
+                    .beerOrderLines(orderLineDtos)
+                    .orderStatus(BeerOrderStateEnum.NEW)
+                    .customerId(UUID.fromString(CUSTOMER_ID))
+                    .createdDate(null)
+                    .lastModifiedDate(null)
+                    .build();
+       return  mapper.writeValueAsString(dto);
     }
 }
