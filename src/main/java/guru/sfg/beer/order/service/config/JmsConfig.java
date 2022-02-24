@@ -12,6 +12,7 @@ public class JmsConfig {
     public final static String VALIDATE_ORDER = "validate_order_q";
     public static final String VALIDATE_ORDER_RESULT = "validate-order-result";
     public static final String ALLOCATE_ORDER = "allocate-order-q";
+    public static final String ALLOCATE_ORDER_RESULT ="allocate-order-result-q";
 
     @Bean
     public MessageConverter messageConverter() {

@@ -2,19 +2,12 @@ package guru.sfg.beer.order.service.statemachine.listener;
 
 import guru.sfg.beer.order.service.config.JmsConfig;
 import guru.sfg.beer.order.service.statemachine.manager.BeerOrderManager;
-import guru.springframework.domain.BeerOrderEventEnum;
-import guru.springframework.domain.BeerOrderStateEnum;
-import guru.springframework.services.validate.BeerOrderValidationResult;
+import guru.springframework.services.messages.BeerOrderValidationResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.handler.annotation.Headers;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.statemachine.config.StateMachineFactory;
 import org.springframework.stereotype.Component;
-
-import javax.jms.Message;
 
 @Slf4j
 @RequiredArgsConstructor
