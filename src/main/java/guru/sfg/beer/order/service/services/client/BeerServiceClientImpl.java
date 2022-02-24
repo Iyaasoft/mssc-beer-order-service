@@ -1,5 +1,6 @@
 package guru.sfg.beer.order.service.services.client;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import guru.sfg.beer.order.service.config.OrderConfig;
 import guru.springframework.web.model.BeerDto;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -20,7 +21,7 @@ public class BeerServiceClientImpl extends OrderConfig implements BeerServiceCli
     public BeerServiceClientImpl(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
     }
-
+    @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_VALUES)
     public ResponseEntity<BeerDto> beerServiceInvoker(UUID beerId) {
 
         BeerDto dto = restTemplate.exchange(

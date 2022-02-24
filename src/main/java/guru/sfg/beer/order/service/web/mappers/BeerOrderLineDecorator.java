@@ -4,6 +4,7 @@ import guru.sfg.beer.order.service.domain.BeerOrderLine;
 import guru.sfg.beer.order.service.services.client.BeerServiceClientImpl;
 import guru.springframework.web.model.BeerDto;
 import guru.springframework.web.model.BeerOrderLineDto;
+import org.mapstruct.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 

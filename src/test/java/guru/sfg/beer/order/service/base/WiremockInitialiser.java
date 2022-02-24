@@ -16,7 +16,7 @@ public class WiremockInitialiser implements ApplicationContextInitializer<Config
     @Override
     public void initialize(ConfigurableApplicationContext configurableApplicationContext) {
 
-        WireMockServer wireMockServer = new WireMockServer(8080);
+        WireMockServer wireMockServer = new WireMockServer(9090);
         wireMockRuntimeInfo =  new WireMockRuntimeInfo(wireMockServer);
 
         wireMockServer.start();

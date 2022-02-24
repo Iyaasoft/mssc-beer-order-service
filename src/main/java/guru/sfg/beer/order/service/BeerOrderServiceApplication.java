@@ -17,7 +17,7 @@ public class BeerOrderServiceApplication {
     }
 
     @Bean
-    @JsonFormat(without = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_VALUES)
+    @JsonFormat(with = JsonFormat.Feature.ACCEPT_CASE_INSENSITIVE_VALUES)
     public ObjectMapper mapper(){
        return new ObjectMapper();
     }

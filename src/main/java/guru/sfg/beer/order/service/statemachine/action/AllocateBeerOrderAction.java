@@ -7,8 +7,8 @@ import guru.sfg.beer.order.service.statemachine.manager.BeerOrderManager;
 import guru.sfg.beer.order.service.web.mappers.BeerOrderMapper;
 import guru.springframework.domain.BeerOrderEventEnum;
 import guru.springframework.domain.BeerOrderStateEnum;
+import guru.springframework.statemachine.action.event.AllocateOrderEvent;
 import guru.springframework.web.model.BeerOrderDto;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +20,12 @@ import org.springframework.stereotype.Component;
 import java.util.Optional;
 import java.util.UUID;
 
+
 @Slf4j
 @Data
 @Component
 @RequiredArgsConstructor
-public class ValidateBeerOrderRequest implements Action<BeerOrderStateEnum, BeerOrderEventEnum> {
+public class AllocateBeerOrderAction implements Action<BeerOrderStateEnum, BeerOrderEventEnum> {
 
     private final BeerOrderRepository beerOrderRepository;
     private final JmsTemplate jmsTemplate;
@@ -33,13 +34,15 @@ public class ValidateBeerOrderRequest implements Action<BeerOrderStateEnum, Beer
     @Override
     public void execute(StateContext<BeerOrderStateEnum, BeerOrderEventEnum> stateContext) {
 
-        Optional.ofNullable(stateContext.getMessage().getPayload()).ifPresent(event -> {
             UUID beerId = (UUID) stateContext.getMessageHeader(BeerOrderManager.BEER_ORDER_ID);
             BeerOrder bo = beerOrderRepository.getOne(beerId);
-            BeerOrderDto beerOrderDto = beerOrderMapper.beerOrderToDto(bo);
-            jmsTemplate.convertAndSend(JmsConfig.VALIDATE_ORDER, beerOrderDto);
-            log.debug("Send validate order to message queue id " + beerId);
-        });
 
+            jmsTemplate.convertAndSend(JmsConfig.ALLOCATE_ORDER, AllocateOrderEvent
+                    .builder()
+                    .beerOrderDto(
+                            beerOrderMapper.beerOrderToDto(bo)
+                    )
+                    .build());
+            log.debug("Send to Allocate order message queue, id : " + beerId);
     }
 }

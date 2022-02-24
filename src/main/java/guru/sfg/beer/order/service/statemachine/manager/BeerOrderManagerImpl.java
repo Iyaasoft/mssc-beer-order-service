@@ -30,24 +30,29 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
         beerOrder.setId(null);
         beerOrder.setOrderStatus(BeerOrderStateEnum.NEW);
         BeerOrder bo = beerOrderRepository.save(beerOrder);
-        sendValidationEvent(bo, BeerOrderEventEnum.VALIDATE_ORDER);
+        sendOrderEvent(bo, BeerOrderEventEnum.VALIDATE_ORDER);
         return beerOrderRepository.save(beerOrder);
 
     }
 
     @Override
     public void sendBeerOrderValidationResult(UUID beerOrderId, boolean valid) {
-        BeerOrder beerOrder =  beerOrderRepository.findOneById(beerOrderId);
+        BeerOrder beerOrder =  beerOrderRepository.getOne(beerOrderId);
         StateMachine<BeerOrderStateEnum, BeerOrderEventEnum> sm = getStateMachine(beerOrder);
         if(valid) {
 
-            sm.sendEvent(BeerOrderEventEnum.VALIDATION_PASSED);
+            sendOrderEvent(beerOrder, BeerOrderEventEnum.VALIDATION_PASSED);
+
+            beerOrder =  beerOrderRepository.findOneById(beerOrderId);
+
+            sendOrderEvent(beerOrder, BeerOrderEventEnum.ALLOCATE_ORDER);
+
         } else {
-            sm.sendEvent(BeerOrderEventEnum.VALIDATION_FAILED);
+            sendOrderEvent(beerOrder, BeerOrderEventEnum.VALIDATION_FAILED);
         }
     }
 
-    private void sendValidationEvent(BeerOrder bo,  BeerOrderEventEnum beerOrderEventEnum) {
+    private void sendOrderEvent(BeerOrder bo, BeerOrderEventEnum beerOrderEventEnum) {
         StateMachine<BeerOrderStateEnum, BeerOrderEventEnum> sm = getStateMachine(bo);
         Message msg = MessageBuilder.withPayload(beerOrderEventEnum).setHeader(BEER_ORDER_ID, bo.getId()).build();
         sm.sendEvent(msg);

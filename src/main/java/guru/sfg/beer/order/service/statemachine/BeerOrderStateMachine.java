@@ -1,11 +1,13 @@
 package guru.sfg.beer.order.service.statemachine;
 
-import guru.sfg.beer.order.service.statemachine.action.ValidateBeerOrderRequest;
+import guru.sfg.beer.order.service.statemachine.action.AllocateBeerOrderAction;
+import guru.sfg.beer.order.service.statemachine.action.ValidateBeerOrderAction;
 import guru.sfg.beer.order.service.statemachine.interceptor.BeerOrderStateChangeInterceptor;
 import guru.springframework.domain.BeerOrderEventEnum;
 import guru.springframework.domain.BeerOrderStateEnum;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.statemachine.action.Action;
 import org.springframework.statemachine.config.EnableStateMachineFactory;
 import org.springframework.statemachine.config.StateMachineConfigurerAdapter;
 import org.springframework.statemachine.config.builders.StateMachineStateConfigurer;
@@ -19,9 +21,8 @@ import java.util.EnumSet;
 public class BeerOrderStateMachine extends StateMachineConfigurerAdapter<BeerOrderStateEnum, BeerOrderEventEnum> {
 
     private final BeerOrderStateChangeInterceptor beerOrderStateChangeInterceptor;
-    private final ValidateBeerOrderRequest validateBeerOrderRequest;
-    // alternatively
-    // private final Action<BeerOrderStateEnum, BeerOrderEventEnum> validateBeerOrderRequest;
+    private final ValidateBeerOrderAction validateBeerOrderAction;
+    private final AllocateBeerOrderAction allocationBeerOrderAction;
 
 
 
@@ -45,7 +46,7 @@ public class BeerOrderStateMachine extends StateMachineConfigurerAdapter<BeerOrd
 
         transitions.withExternal().source(BeerOrderStateEnum.NEW).target(BeerOrderStateEnum.VALIDATION_PENDING)
                 .event(BeerOrderEventEnum.VALIDATE_ORDER)
-                .action(validateBeerOrderRequest)
+                .action(validateBeerOrderAction)
             .and()
                 .withExternal().source(BeerOrderStateEnum.NEW).target(BeerOrderStateEnum.VALIDATED)
                 .event(BeerOrderEventEnum.VALIDATION_PASSED)
@@ -53,14 +54,14 @@ public class BeerOrderStateMachine extends StateMachineConfigurerAdapter<BeerOrd
                 .withExternal().source(BeerOrderStateEnum.NEW).target(BeerOrderStateEnum.VALIDATION_EXCEPTION)
                 .event(BeerOrderEventEnum.VALIDATION_FAILED)
             .and()
-                .withExternal().source(BeerOrderStateEnum.VALIDATED).target(BeerOrderStateEnum.ALLOCATION)
-                .event(BeerOrderEventEnum.ALLOCATION_SUCCESS)
+                .withExternal().source(BeerOrderStateEnum.VALIDATED).target(BeerOrderStateEnum.ALLOCATION_PENDING)
+                .event(BeerOrderEventEnum.ALLOCATE_ORDER).action(allocationBeerOrderAction);
 
-                .and().withExternal().source(BeerOrderStateEnum.ALLOCATION).target(BeerOrderStateEnum.ALLOCATION_PENDING).event(BeerOrderEventEnum.ALLOCATION_NO_INVENTORY)
-                .and().withExternal().source(BeerOrderStateEnum.ALLOCATION).target(BeerOrderStateEnum.ALLOCATION_EXCEPTION).event(BeerOrderEventEnum.ALLOCATION_FAILED)
-                .and().withExternal().source(BeerOrderStateEnum.ALLOCATION).target(BeerOrderStateEnum.PICKED_UP).event(BeerOrderEventEnum.ORDER_COLLECTED)
-                .and().withExternal().source(BeerOrderStateEnum.PICKED_UP).target(BeerOrderStateEnum.DELIVERED).event(BeerOrderEventEnum.ORDER_DELIVERED)
-                .and().withExternal().source(BeerOrderStateEnum.PICKED_UP).target(BeerOrderStateEnum.DELIVERY_EXCEPTION).event(BeerOrderEventEnum.ORDER_DELIVERY_FAILED);
+//                .and().withExternal().source(BeerOrderStateEnum.ALLOCATION).target(BeerOrderStateEnum.ALLOCATION_PENDING).event(BeerOrderEventEnum.ALLOCATION_NO_INVENTORY)
+//                .and().withExternal().source(BeerOrderStateEnum.ALLOCATION).target(BeerOrderStateEnum.ALLOCATION_EXCEPTION).event(BeerOrderEventEnum.ALLOCATION_FAILED)
+//                .and().withExternal().source(BeerOrderStateEnum.ALLOCATION).target(BeerOrderStateEnum.PICKED_UP).event(BeerOrderEventEnum.ORDER_COLLECTED)
+//                .and().withExternal().source(BeerOrderStateEnum.PICKED_UP).target(BeerOrderStateEnum.DELIVERED).event(BeerOrderEventEnum.ORDER_DELIVERED)
+//                .and().withExternal().source(BeerOrderStateEnum.PICKED_UP).target(BeerOrderStateEnum.DELIVERY_EXCEPTION).event(BeerOrderEventEnum.ORDER_DELIVERY_FAILED);
 
     }
 }
