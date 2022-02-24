@@ -21,9 +21,8 @@ import java.util.EnumSet;
 public class BeerOrderStateMachine extends StateMachineConfigurerAdapter<BeerOrderStateEnum, BeerOrderEventEnum> {
 
     private final BeerOrderStateChangeInterceptor beerOrderStateChangeInterceptor;
-    private final ValidateBeerOrderAction validateBeerOrderAction;
-    private final AllocateBeerOrderAction allocationBeerOrderAction;
-
+    private final Action<BeerOrderStateEnum,BeerOrderEventEnum> allocateBeerOrderAction;
+    private final Action<BeerOrderStateEnum,BeerOrderEventEnum>  validateBeerOrderAction;
 
 
     @Override
@@ -55,7 +54,7 @@ public class BeerOrderStateMachine extends StateMachineConfigurerAdapter<BeerOrd
                 .event(BeerOrderEventEnum.VALIDATION_FAILED)
             .and()
                 .withExternal().source(BeerOrderStateEnum.VALIDATED).target(BeerOrderStateEnum.ALLOCATION_PENDING)
-                .event(BeerOrderEventEnum.ALLOCATE_ORDER).action(allocationBeerOrderAction);
+                .event(BeerOrderEventEnum.ALLOCATE_ORDER).action(allocateBeerOrderAction);
 
 //                .and().withExternal().source(BeerOrderStateEnum.ALLOCATION).target(BeerOrderStateEnum.ALLOCATION_PENDING).event(BeerOrderEventEnum.ALLOCATION_NO_INVENTORY)
 //                .and().withExternal().source(BeerOrderStateEnum.ALLOCATION).target(BeerOrderStateEnum.ALLOCATION_EXCEPTION).event(BeerOrderEventEnum.ALLOCATION_FAILED)
