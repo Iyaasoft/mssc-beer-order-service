@@ -54,11 +54,16 @@ public class BeerOrderStateMachine extends StateMachineConfigurerAdapter<BeerOrd
                 .event(BeerOrderEventEnum.VALIDATION_FAILED)
             .and()
                 .withExternal().source(BeerOrderStateEnum.VALIDATED).target(BeerOrderStateEnum.ALLOCATION_PENDING)
-                .event(BeerOrderEventEnum.ALLOCATE_ORDER).action(allocateBeerOrderAction);
-
-//                .and().withExternal().source(BeerOrderStateEnum.ALLOCATION).target(BeerOrderStateEnum.ALLOCATION_PENDING).event(BeerOrderEventEnum.ALLOCATION_NO_INVENTORY)
-//                .and().withExternal().source(BeerOrderStateEnum.ALLOCATION).target(BeerOrderStateEnum.ALLOCATION_EXCEPTION).event(BeerOrderEventEnum.ALLOCATION_FAILED)
-//                .and().withExternal().source(BeerOrderStateEnum.ALLOCATION).target(BeerOrderStateEnum.PICKED_UP).event(BeerOrderEventEnum.ORDER_COLLECTED)
+                .event(BeerOrderEventEnum.ALLOCATE_ORDER)
+                .action(allocateBeerOrderAction)
+            .and()
+                .withExternal().source(BeerOrderStateEnum.ALLOCATION_PENDING).target(BeerOrderStateEnum.ALLOCATED)
+                .event(BeerOrderEventEnum.ALLOCATION_SUCCESS)
+            .and()
+                .withExternal().source(BeerOrderStateEnum.ALLOCATION_PENDING).target(BeerOrderStateEnum.ALLOCATION_EXCEPTION)
+                .event(BeerOrderEventEnum.ALLOCATION_FAILED)
+            .and().withExternal().source(BeerOrderStateEnum.ALLOCATION_PENDING).target(BeerOrderStateEnum.PENDING_INVENTORY)
+                .event(BeerOrderEventEnum.ALLOCATION_NO_INVENTORY);
 //                .and().withExternal().source(BeerOrderStateEnum.PICKED_UP).target(BeerOrderStateEnum.DELIVERED).event(BeerOrderEventEnum.ORDER_DELIVERED)
 //                .and().withExternal().source(BeerOrderStateEnum.PICKED_UP).target(BeerOrderStateEnum.DELIVERY_EXCEPTION).event(BeerOrderEventEnum.ORDER_DELIVERY_FAILED);
 
