@@ -9,6 +9,8 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
+
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -16,11 +18,13 @@ public class ValidateBeerOrderResponseListener {
 
     private  final BeerOrderManager beerOrderManager;
 
+    @Transactional
     @JmsListener(destination = JmsConfig.VALIDATE_ORDER_RESULT)
     public void handleResponse(@Payload BeerOrderValidationResult beerOrderValidationResult) {
         if(beerOrderValidationResult.isValid()){
-            beerOrderManager.sendBeerOrderValidationResult(beerOrderValidationResult.getBeerOrderId(), beerOrderValidationResult.isValid());
             log.debug("Send validate passed to state machine id : " + beerOrderValidationResult.getBeerOrderId());
+            beerOrderManager.sendBeerOrderValidationResult(beerOrderValidationResult.getBeerOrderId(), beerOrderValidationResult.isValid());
+
         }
     }
 }

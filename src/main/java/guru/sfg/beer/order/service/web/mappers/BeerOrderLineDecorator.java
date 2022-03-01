@@ -30,7 +30,7 @@ public abstract class BeerOrderLineDecorator implements  BeerOrderLineMapper {
     public BeerOrderLineDto beerOrderLineToDto(BeerOrderLine line) {
         BeerOrderLineDto lineDto = beerOrderLineMapper.beerOrderLineToDto(line);
         // faking call the service with a known id
-        lineDto.setBeerId(UUID.fromString("5456319d-7b6f-41e0-a6e3-2365f3a6d196"));
+       // lineDto.setBeerId(UUID.fromString("5456319d-7b6f-41e0-a6e3-2365f3a6d196"));
         ResponseEntity<BeerDto> beerDto = beerServiceClient.beerServiceInvoker(lineDto.getBeerId());
         lineDto.setBeerId(line.getBeerId());
         lineDto.setBeerName(beerDto.getBody().getBeerName());

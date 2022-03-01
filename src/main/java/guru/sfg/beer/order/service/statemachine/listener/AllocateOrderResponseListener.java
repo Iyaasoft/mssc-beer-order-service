@@ -9,6 +9,8 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
+import javax.transaction.Transactional;
+
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -16,6 +18,7 @@ public class AllocateOrderResponseListener {
 
     private final BeerOrderManager beerOrderManager;
 
+    @Transactional
     @JmsListener(destination = JmsConfig.ALLOCATE_ORDER_RESULT)
     public void handle(@Payload AllocateOrderResult allocateOrderResult) {
         log.debug("Handle allocation response for order : " + allocateOrderResult.getBeerOrder().getId());

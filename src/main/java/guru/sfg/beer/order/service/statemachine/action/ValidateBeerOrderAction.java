@@ -35,15 +35,17 @@ public class ValidateBeerOrderAction implements Action<BeerOrderStateEnum, BeerO
 
         Optional.ofNullable(stateContext.getMessage().getPayload()).ifPresent(event -> {
             UUID beerId = (UUID) stateContext.getMessageHeader(BeerOrderManager.BEER_ORDER_ID);
-            BeerOrder bo = beerOrderRepository.getOne(beerId);
-            BeerOrderDto beerOrderDto = beerOrderMapper.beerOrderToDto(bo);
+            Optional<BeerOrder> bo = beerOrderRepository.findById(beerId);
+            if(bo.isPresent()) {
+                BeerOrderDto beerOrderDto = beerOrderMapper.beerOrderToDto(bo.get());
 
-            ValidateOrderEvent request = ValidateOrderEvent
-                    .builder()
-                    .beerOrderDto(beerOrderDto).build();
+                ValidateOrderEvent request = ValidateOrderEvent
+                        .builder()
+                        .beerOrderDto(beerOrderDto).build();
 
-            jmsTemplate.convertAndSend(JmsConfig.VALIDATE_ORDER, request);
-            log.debug("Send validate order to message queue id " + beerId);
+                jmsTemplate.convertAndSend(JmsConfig.VALIDATE_ORDER, request);
+                log.debug("Send validate order to message queue id " + beerId);
+            }
         });
 
     }
