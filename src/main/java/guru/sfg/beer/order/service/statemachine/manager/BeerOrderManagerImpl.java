@@ -85,7 +85,6 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
                 sendAllocationNoInventoryMsg(order, beerOrderDto);
                 log.debug("send beer allocation no inventory -> order id: " + beerOrderDto.getId());
             }
-            log.debug("send beer allocation  msg order id : "+ beerOrderDto.getId());
         }, () -> log.error("Error processing order allocation result"));
 
     }

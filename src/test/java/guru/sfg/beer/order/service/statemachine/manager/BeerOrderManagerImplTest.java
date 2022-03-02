@@ -71,7 +71,7 @@ class BeerOrderManagerImplTest extends BaseInventoryTest {
         await().atMost(5, SECONDS).until(
                 () -> {
                     BeerOrder found  = beerOrderRepository.findById(beerOrder.getId()).get();
-                    assertEquals(BeerOrderStateEnum.ALLOCATION_PENDING, found.getOrderStatus());
+                    assertEquals(BeerOrderStateEnum.ALLOCATED, found.getOrderStatus());
                     return true;
                 });
         Optional<BeerOrder> orderSaved = beerOrderRepository.findById(beerOrder.getId());
