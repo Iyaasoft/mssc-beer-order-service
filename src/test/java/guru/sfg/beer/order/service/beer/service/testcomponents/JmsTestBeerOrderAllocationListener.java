@@ -28,6 +28,10 @@ public class JmsTestBeerOrderAllocationListener {
     public void allocateOrderListener(Message message) {
         log.debug("send allocated result to  -> ALLOCATE_ORDER_RESULT");
         AllocateOrderEvent event = (AllocateOrderEvent) message.getPayload();
+
+        event.getBeerOrderDto().getBeerOrderLines().forEach(line -> {
+            line.setQuantityAllocated(line.getOrderQuantity());
+        });
         jmsTemplate.convertAndSend(JmsConfig.ALLOCATE_ORDER_RESULT,  AllocateOrderResult.builder()
                 .allocated(true)
                 .allocationError(false)

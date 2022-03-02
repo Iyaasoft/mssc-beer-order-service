@@ -96,6 +96,7 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
         Optional<BeerOrder> beerOrderFound = beerOrderRepository.findById(beerOrder.getId());
         sendOrderEvent( beerOrderFound.get() , BeerOrderEventEnum.ALLOCATION_NO_INVENTORY);
         updateOrderQuantities(beerOrderDto,beerOrder);
+        beerOrderRepository.saveAndFlush(beerOrder);
         log.debug("send beer allocation no inventory  msg order id : "+ beerOrderDto.getId());
     }
 
@@ -104,6 +105,7 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
         Optional<BeerOrder> beerOrderFound = beerOrderRepository.findById(beerOrder.getId());
         sendOrderEvent( beerOrderFound.get() , BeerOrderEventEnum.ALLOCATION_SUCCESS);
         updateOrderQuantities(beerOrderDto,beerOrder);
+        beerOrderRepository.saveAndFlush(beerOrder);
         log.debug("send beer allocation  success msg order id : "+ beerOrderDto.getId());
 
     }
