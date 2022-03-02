@@ -36,13 +36,14 @@ public class AllocateBeerOrderAction implements Action<BeerOrderStateEnum, BeerO
 
             UUID beerId = (UUID) stateContext.getMessageHeader(BeerOrderManager.BEER_ORDER_ID);
             Optional<BeerOrder> bo = beerOrderRepository.findById(beerId);
-
-            jmsTemplate.convertAndSend(JmsConfig.ALLOCATE_ORDER, AllocateOrderEvent
-                    .builder()
-                    .beerOrderDto(
-                            beerOrderMapper.beerOrderToDto(bo.get())
-                    )
-                    .build());
-            log.debug("Send to Allocate order message queue, id : " + beerId);
+            bo.ifPresentOrElse (order -> {
+                jmsTemplate.convertAndSend(JmsConfig.ALLOCATE_ORDER, AllocateOrderEvent
+                        .builder()
+                        .beerOrderDto(
+                                beerOrderMapper.beerOrderToDto(order)
+                        )
+                        .build());
+                log.debug("Send to Allocate order message queue, id : " + beerId);
+            }, () -> log.debug("Error ALLOCATE_ORDER, beer order not found id : " + beerId));
     }
 }

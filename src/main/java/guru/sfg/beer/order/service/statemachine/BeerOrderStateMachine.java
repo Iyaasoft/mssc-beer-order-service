@@ -20,10 +20,8 @@ import java.util.EnumSet;
 @EnableStateMachineFactory
 public class BeerOrderStateMachine extends StateMachineConfigurerAdapter<BeerOrderStateEnum, BeerOrderEventEnum> {
 
-    private final BeerOrderStateChangeInterceptor beerOrderStateChangeInterceptor;
     private final Action<BeerOrderStateEnum,BeerOrderEventEnum> allocateBeerOrderAction;
     private final Action<BeerOrderStateEnum,BeerOrderEventEnum>  validateBeerOrderAction;
-
 
     @Override
     public void configure(StateMachineStateConfigurer<BeerOrderStateEnum, BeerOrderEventEnum> states) throws Exception {
@@ -63,9 +61,15 @@ public class BeerOrderStateMachine extends StateMachineConfigurerAdapter<BeerOrd
                 .withExternal().source(BeerOrderStateEnum.ALLOCATION_PENDING).target(BeerOrderStateEnum.ALLOCATION_EXCEPTION)
                 .event(BeerOrderEventEnum.ALLOCATION_FAILED)
             .and().withExternal().source(BeerOrderStateEnum.ALLOCATION_PENDING).target(BeerOrderStateEnum.PENDING_INVENTORY)
-                .event(BeerOrderEventEnum.ALLOCATION_NO_INVENTORY);
-//                .and().withExternal().source(BeerOrderStateEnum.PICKED_UP).target(BeerOrderStateEnum.DELIVERED).event(BeerOrderEventEnum.ORDER_DELIVERED)
-//                .and().withExternal().source(BeerOrderStateEnum.PICKED_UP).target(BeerOrderStateEnum.DELIVERY_EXCEPTION).event(BeerOrderEventEnum.ORDER_DELIVERY_FAILED);
+                .event(BeerOrderEventEnum.ALLOCATION_NO_INVENTORY)
+            .and().withExternal().source(BeerOrderStateEnum.ALLOCATED).target(BeerOrderStateEnum.ALLOCATED)
+                .event(BeerOrderEventEnum.ORDER_FOR_COLLECTION)
+                //.action(pickUpBeerOrderAction)
+           .and().withExternal().source(BeerOrderStateEnum.ALLOCATED).target(BeerOrderStateEnum.PICKED_UP)
+
+           .and().withExternal().source(BeerOrderStateEnum.PICKED_UP).target(BeerOrderStateEnum.DELIVERED)
+                .event(BeerOrderEventEnum.ORDER_DELIVERED)
+           .and().withExternal().source(BeerOrderStateEnum.PICKED_UP).target(BeerOrderStateEnum.DELIVERY_EXCEPTION).event(BeerOrderEventEnum.ORDER_DELIVERY_FAILED);
 
     }
 }

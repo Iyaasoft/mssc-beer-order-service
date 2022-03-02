@@ -13,4 +13,8 @@ public interface BeerOrderManager {
     void sendBeerOrderValidationResult(UUID beerOrderId, boolean valid);
 
     void sendBeerOrderAllocationResult(BeerOrderDto beerOrder, boolean allocated, boolean allocationError);
+
+    void pickUpBeerOrder(UUID beerId);
+
+    void deliverBeerOrder(UUID id);
 }

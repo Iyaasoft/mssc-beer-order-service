@@ -15,7 +15,6 @@ import org.springframework.statemachine.config.StateMachineFactory;
 import org.springframework.statemachine.support.DefaultStateMachineContext;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -86,6 +85,26 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
                 log.debug("send beer allocation no inventory -> order id: " + beerOrderDto.getId());
             }
         }, () -> log.error("Error processing order allocation result"));
+
+    }
+
+    @Override
+    public void pickUpBeerOrder(UUID orderId) {
+        Optional<BeerOrder> beerOrderFound = beerOrderRepository.findById(orderId);
+        beerOrderFound.ifPresentOrElse(order -> {
+            sendOrderEvent(order,BeerOrderEventEnum.ORDER_FOR_COLLECTION);
+        },()->log.debug("Error ORDER_COLLECTED, beer order not fuond "+ orderId));
+        log.debug("send beer order picked up  msg order id : "+ orderId);
+
+    }
+
+    @Override
+    public void deliverBeerOrder(UUID orderId) {
+        Optional<BeerOrder> beerOrderFound = beerOrderRepository.findById(orderId);
+        beerOrderFound.ifPresentOrElse(order -> {
+            sendOrderEvent(order,BeerOrderEventEnum.ORDER_DELIVERED);
+        },()->log.debug("Error ORDER_DELIVERED, beer order not found "+ orderId));
+        log.debug("send beer order delivered  msg order id : "+ orderId);
 
     }
 
