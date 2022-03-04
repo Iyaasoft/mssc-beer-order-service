@@ -27,7 +27,6 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
     private final BeerOrderRepository beerOrderRepository;
     private final BeerOrderStateChangeInterceptor beerOrderStateChangeInterceptor;
 
-   // @Transactional
     @Override
     public BeerOrder newBeerOrder(final BeerOrder beerOrder) {
         beerOrder.setId(null);
@@ -40,7 +39,6 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
 
     }
 
-  //  @Transactional
     @Override
     public void sendBeerOrderValidationResult(final UUID beerOrderId, final boolean valid) {
 
@@ -68,7 +66,6 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
                 }, () -> log.error("Order not found id : "+beerOrderId));
                 }
 
-  //  @Transactional
     @Override
     public void sendBeerOrderAllocationResult(final BeerOrderDto beerOrderDto, final boolean allocated,final  boolean allocationError) {
 
@@ -101,11 +98,12 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
     @Override
     public void deliverBeerOrder(UUID orderId) {
         Optional<BeerOrder> beerOrderFound = beerOrderRepository.findById(orderId);
+
         beerOrderFound.ifPresentOrElse(order -> {
+            log.debug("++++++++++++  current state  : "+ order.getOrderStatus());
             sendOrderEvent(order,BeerOrderEventEnum.ORDER_DELIVERED);
         },()->log.debug("Error ORDER_DELIVERED, beer order not found "+ orderId));
         log.debug("send beer order delivered  msg order id : "+ orderId);
-
     }
 
 
@@ -122,9 +120,11 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
     private void sendAllocationSuccessMsg(BeerOrder beerOrder, BeerOrderDto beerOrderDto) {
         beerOrder.setOrderStatus(BeerOrderStateEnum.ALLOCATED);
         Optional<BeerOrder> beerOrderFound = beerOrderRepository.findById(beerOrder.getId());
-        sendOrderEvent( beerOrderFound.get() , BeerOrderEventEnum.ALLOCATION_SUCCESS);
-        updateOrderQuantities(beerOrderDto,beerOrder);
-        beerOrderRepository.saveAndFlush(beerOrder);
+        beerOrderFound.ifPresentOrElse(order -> {
+        sendOrderEvent( order , BeerOrderEventEnum.ALLOCATION_SUCCESS);
+        updateOrderQuantities(beerOrderDto,order);
+        beerOrderRepository.saveAndFlush(order);
+        }, () -> log.debug("Beer order not found id : "+beerOrder.getId()));
         log.debug("send beer allocation  success msg order id : "+ beerOrderDto.getId());
 
     }
@@ -133,8 +133,10 @@ public class BeerOrderManagerImpl implements BeerOrderManager {
         beerOrder.setOrderStatus(BeerOrderStateEnum.ALLOCATION_EXCEPTION);
         beerOrderRepository.saveAndFlush(beerOrder);
         Optional<BeerOrder> beerOrderFound = beerOrderRepository.findById(beerOrder.getId());
-        sendOrderEvent( beerOrderFound.get() , BeerOrderEventEnum.ALLOCATION_FAILED);
-        log.debug("send beer allocation  failedc msg order id : "+ beerOrderDto.getId());
+        beerOrderFound.ifPresentOrElse(order -> {
+        sendOrderEvent( order , BeerOrderEventEnum.ALLOCATION_FAILED);
+        }, () -> log.error("Beer order allocation failed id: "+beerOrder.getId()));
+        log.debug("send beer allocation  failed msg order id : "+ beerOrderDto.getId());
     }
 
 

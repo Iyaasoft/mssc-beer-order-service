@@ -21,10 +21,7 @@ public class ValidateBeerOrderResponseListener {
     @Transactional
     @JmsListener(destination = JmsConfig.VALIDATE_ORDER_RESULT)
     public void handleResponse(@Payload BeerOrderValidationResult beerOrderValidationResult) {
-        if(beerOrderValidationResult.isValid()){
-            log.debug("Send validate passed to state machine id : " + beerOrderValidationResult.getBeerOrderId());
+            log.debug("Send validate result to state machine id : " + beerOrderValidationResult.getBeerOrderId());
             beerOrderManager.sendBeerOrderValidationResult(beerOrderValidationResult.getBeerOrderId(), beerOrderValidationResult.isValid());
-
-        }
     }
 }

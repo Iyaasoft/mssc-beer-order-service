@@ -13,6 +13,7 @@ import guru.sfg.beer.order.service.repositories.BeerOrderRepository;
 import guru.springframework.domain.BeerOrderStateEnum;
 import guru.springframework.web.model.BeerDto;
 import guru.springframework.web.model.BeerStyleEnum;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,22 +60,9 @@ class BeerOrderManagerImplTest extends BaseInventoryTest {
         prepareWiremockStub(wireMockServer, "Allocated Beer");
 
         beerOrderManager.newBeerOrder(beerOrder);
-        await().atMost(5, SECONDS).until(
-                () -> {
-                    BeerOrder found  = beerOrderRepository.findById(beerOrder.getId()).get();
-                    assertEquals(BeerOrderStateEnum.ALLOCATED, found.getOrderStatus());
-                    return true;
-                });
 
-        await().atMost(5, SECONDS).until(
-                () -> {
-                    BeerOrder found  = beerOrderRepository.findById(beerOrder.getId()).get();
-                    found.getBeerOrderLines().forEach(line ->
-                            assertEquals(line.getOrderQuantity(),line.getQuantityAllocated())
-                            );
-                    assertEquals(BeerOrderStateEnum.ALLOCATED, found.getOrderStatus());
-                    return true;
-                });
+        waitAndAssertBeerQuantities(beerOrder, BeerOrderStateEnum.ALLOCATED);
+
         Optional<BeerOrder> orderSaved = beerOrderRepository.findById(beerOrder.getId());
         assertEquals(BeerOrderStateEnum.ALLOCATED, orderSaved.get().getOrderStatus());
     }
@@ -87,24 +75,45 @@ class BeerOrderManagerImplTest extends BaseInventoryTest {
 
         final BeerOrder savedBeerOrder = beerOrderManager.newBeerOrder(beerOrder);
 
-        await().atMost(5, SECONDS).until(
-                () -> {
-                    BeerOrder found  = beerOrderRepository.findById(savedBeerOrder.getId()).get();
-                    assertEquals(BeerOrderStateEnum.ALLOCATED, found.getOrderStatus());
-                    found.getBeerOrderLines().forEach(line ->
-                            assertEquals(line.getOrderQuantity(),line.getQuantityAllocated())
-                    );
-                    return true;
-                });
+        waitAndAssertBeerQuantities(savedBeerOrder, BeerOrderStateEnum.ALLOCATED);
 
         beerOrderManager.pickUpBeerOrder(savedBeerOrder.getId());
 
-        BeerOrder orderSaved  = beerOrderRepository.findById(beerOrder.getId()).get();
+        BeerOrder orderSaved = beerOrderRepository.findById(beerOrder.getId()).get();
 
         assertEquals(BeerOrderStateEnum.PICKED_UP, orderSaved.getOrderStatus());
     }
 
 
+    @Test
+    void ValidationFailedTest() throws JsonProcessingException {
+        BeerOrder beerOrder = getBeerOrder();
+
+        prepareWiremockStub(wireMockServer, "Validation Failed");
+
+        beerOrder.setCustomerRef("fail-validation");
+
+        beerOrderManager.newBeerOrder(beerOrder);
+
+        waitAndAssertBeerOrderState(beerOrder, BeerOrderStateEnum.VALIDATION_EXCEPTION);
+    }
+
+    @Test
+    void AllocationFailedTest() throws JsonProcessingException {
+        BeerOrder beerOrder = getBeerOrder();
+
+        prepareWiremockStub(wireMockServer, "Validation Failed");
+
+        beerOrder.setCustomerRef("fail-allocation");
+
+        beerOrderManager.newBeerOrder(beerOrder);
+
+        waitAndAssertBeerOrderState(beerOrder, BeerOrderStateEnum.ALLOCATION_EXCEPTION);
+
+
+    }
+
+    @Disabled
     @Test
     void deliverBeerOrder(WireMockRuntimeInfo wireMockRuntimeInfo) throws Exception {
         BeerOrder beerOrder = getBeerOrder();
@@ -113,35 +122,25 @@ class BeerOrderManagerImplTest extends BaseInventoryTest {
 
         final BeerOrder savedBeerOrder = beerOrderManager.newBeerOrder(beerOrder);
 
-        await().atMost(5, SECONDS).until(
-                () -> {
-                    BeerOrder found  = beerOrderRepository.findById(savedBeerOrder.getId()).get();
-                    assertEquals(BeerOrderStateEnum.ALLOCATED, found.getOrderStatus());
-                    found.getBeerOrderLines().forEach(line ->
-                            assertEquals(line.getOrderQuantity(),line.getQuantityAllocated())
-                    );
-                    return true;
-                });
+        waitAndAssertBeerQuantities(savedBeerOrder, BeerOrderStateEnum.ALLOCATED );
 
         beerOrderManager.pickUpBeerOrder(savedBeerOrder.getId());
 
-        await().atMost(5, SECONDS).until(
+        waitAndAssertBeerOrderState(beerOrder, BeerOrderStateEnum.PICKED_UP);
+
+        beerOrderManager.deliverBeerOrder(savedBeerOrder.getId());
+
+        waitAndAssertBeerOrderState(beerOrder, BeerOrderStateEnum.DELIVERED);
+    }
+
+    private void waitAndAssertBeerOrderState(BeerOrder beerOrder, BeerOrderStateEnum state) {
+        await().atMost(30, SECONDS).until(
                 () -> {
         BeerOrder orderSaved  = beerOrderRepository.findById(beerOrder.getId()).get();
 
-        assertEquals(BeerOrderStateEnum.PICKED_UP, orderSaved.getOrderStatus());
+        assertEquals(state, orderSaved.getOrderStatus());
                     return true;
          });
-
-        beerOrderManager.deliverBeerOrder(savedBeerOrder.getId());
-        await().atMost(5, SECONDS).until(
-                () -> {
-                    BeerOrder orderDelivered = beerOrderRepository.findById(beerOrder.getId()).get();
-                    assertEquals(BeerOrderStateEnum.PICKED_UP, orderDelivered.getOrderStatus());
-                    return true;
-                });
-
-
     }
 
     private BeerOrder getBeerOrder() {
@@ -161,6 +160,18 @@ class BeerOrderManagerImplTest extends BaseInventoryTest {
                 .willReturn(aResponse().withBody(responseJson)
                         .withStatus(HttpStatus.OK.value())
                         .withHeader("content-type", "application/json")));
+    }
+
+    private void waitAndAssertBeerQuantities(BeerOrder savedBeerOrder, BeerOrderStateEnum state) {
+        await().atMost(30, SECONDS).until(
+                () -> {
+                    BeerOrder found  = beerOrderRepository.findById(savedBeerOrder.getId()).get();
+                    assertEquals(state, found.getOrderStatus());
+                    found.getBeerOrderLines().forEach(line ->
+                            assertEquals(line.getOrderQuantity(),line.getQuantityAllocated())
+                    );
+                    return true;
+                });
     }
 
 

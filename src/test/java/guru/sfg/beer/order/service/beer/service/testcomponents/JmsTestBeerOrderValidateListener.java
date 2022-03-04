@@ -22,14 +22,19 @@ public class JmsTestBeerOrderValidateListener {
     public void validateMsgListener(Message message) {
 
         System.out.println("+++++++  IM RUNNING ++++++++++ ");
+        boolean isValid = true;
         ValidateOrderEvent event = (ValidateOrderEvent) message.getPayload();
+        // return an invalid state
+        if("fail-validation".equals(event.getBeerOrderDto().getCustomerRef())){
+            isValid = false;
+        }
         log.debug("test send listener  Validate result msg to q "+event);
 
         jmsTemplate.convertAndSend(JmsConfig.VALIDATE_ORDER_RESULT,
                 BeerOrderValidationResult.builder()
                         .beerOrderId(event
                                 .getBeerOrderDto().getId())
-                                .isValid(true)
+                                .isValid(isValid)
                         .build());
 
     }

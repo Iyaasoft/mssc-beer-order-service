@@ -26,15 +26,22 @@ public class JmsTestBeerOrderAllocationListener {
 
     @JmsListener(destination = JmsConfig.ALLOCATE_ORDER)
     public void allocateOrderListener(Message message) {
+
+        boolean allocated = true;
+        boolean allocationError = false;
+
         log.debug("send allocated result to  -> ALLOCATE_ORDER_RESULT");
         AllocateOrderEvent event = (AllocateOrderEvent) message.getPayload();
-
-        event.getBeerOrderDto().getBeerOrderLines().forEach(line -> {
-            line.setQuantityAllocated(line.getOrderQuantity());
-        });
+        if("fail-allocation".equals(event.getBeerOrderDto().getCustomerRef())) {
+            allocated = false;
+            allocationError = true;
+        }
+            event.getBeerOrderDto().getBeerOrderLines().forEach(line -> {
+                line.setQuantityAllocated(line.getOrderQuantity());
+            });
         jmsTemplate.convertAndSend(JmsConfig.ALLOCATE_ORDER_RESULT,  AllocateOrderResult.builder()
-                .allocated(true)
-                .allocationError(false)
+                .allocated(allocated)
+                .allocationError(allocationError)
                 .beerOrder(event.getBeerOrderDto())
                 .build());
     }
