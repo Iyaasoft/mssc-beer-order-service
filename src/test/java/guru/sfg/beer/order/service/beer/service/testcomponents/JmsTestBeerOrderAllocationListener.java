@@ -7,6 +7,7 @@ import guru.springframework.domain.BeerOrderEventEnum;
 import guru.springframework.domain.BeerOrderStateEnum;
 import guru.springframework.services.messages.AllocateOrderResult;
 import guru.springframework.statemachine.action.event.AllocateOrderEvent;
+import guru.springframework.statemachine.action.event.CancelOrderEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jms.annotation.JmsListener;
@@ -36,9 +37,16 @@ public class JmsTestBeerOrderAllocationListener {
             allocated = false;
             allocationError = true;
         }
-            event.getBeerOrderDto().getBeerOrderLines().forEach(line -> {
-                line.setQuantityAllocated(line.getOrderQuantity());
-            });
+
+        if("allocation-cancelled".equals(event.getBeerOrderDto().getCustomerRef())) {
+            jmsTemplate.convertAndSend(JmsConfig.CANCELLED_ORDER_Q, CancelOrderEvent.builder()
+                    .beerOrderDto(event.getBeerOrderDto()).build());
+            return;
+        }
+
+        event.getBeerOrderDto().getBeerOrderLines().forEach(line -> {
+            line.setQuantityAllocated(line.getOrderQuantity());
+        });
         jmsTemplate.convertAndSend(JmsConfig.ALLOCATE_ORDER_RESULT,  AllocateOrderResult.builder()
                 .allocated(allocated)
                 .allocationError(allocationError)

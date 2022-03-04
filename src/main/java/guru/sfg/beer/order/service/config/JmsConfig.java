@@ -19,6 +19,7 @@ public class JmsConfig {
     public static final String ALLOCATE_ORDER_RESULT ="allocate-order-result-q";
     public static final String PICKED_UP_BEER_Q = "pickup-order-q";
     public static final String ORDER_COLLECTION_RESULT = "order-collectiuon-result-q";
+    public static final String CANCELLED_ORDER_Q = "cancelled_order_q";
 
     @Bean
     public MessageConverter messageConverter(ObjectMapper objectMapper) {

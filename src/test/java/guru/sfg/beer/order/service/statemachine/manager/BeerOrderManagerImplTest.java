@@ -113,6 +113,21 @@ class BeerOrderManagerImplTest extends BaseInventoryTest {
 
     }
 
+    @Test
+    void AllocationCancelledTest() throws JsonProcessingException {
+        BeerOrder beerOrder = getBeerOrder();
+
+        prepareWiremockStub(wireMockServer, "Cancel Order");
+
+        beerOrder.setCustomerRef("allocation-cancelled");
+
+        beerOrderManager.newBeerOrder(beerOrder);
+
+        waitAndAssertBeerOrderState(beerOrder, BeerOrderStateEnum.CANCELLED);
+
+
+    }
+
     @Disabled
     @Test
     void deliverBeerOrder(WireMockRuntimeInfo wireMockRuntimeInfo) throws Exception {
